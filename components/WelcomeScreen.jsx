@@ -1,21 +1,22 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, StatusBar, Image, Pressable, TextInput, Animated, Alert } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, Image, Pressable, TextInput, Animated, Alert, KeyboardAvoidingView, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { hp, wp } from '../helpers/common';
 import { theme } from '../constants/theme';
 
 const WelcomeScreen = () => {
   const router = useRouter();
-  const scaleAnim = useRef(new Animated.Value(1)).current; // Butonun başlangıç boyutu
-  const [username, setUsername] = useState(''); // Kullanıcı adı durumu
-  const [password, setPassword] = useState(''); // Şifre durumu
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
-  // Basıldığında küçültme ve bırakıldığında geri büyütme animasyonu
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
-      toValue: 1.1,
-      friction: 3,
+      toValue: 0.96,
+      friction: 4,
       useNativeDriver: true,
     }).start();
   };
@@ -23,7 +24,7 @@ const WelcomeScreen = () => {
   const handlePressOut = () => {
     Animated.spring(scaleAnim, {
       toValue: 1,
-      friction: 3,
+      friction: 4,
       useNativeDriver: true,
     }).start();
   };
@@ -31,7 +32,7 @@ const WelcomeScreen = () => {
   // Kullanıcı adı ve şifre doğrulaması
   const handleLogin = () => {
     if (username === 'Akif' && password === '6154') {
-      router.push('home'); // Home ekranına yönlendir
+      router.push('home');
     } else {
       Alert.alert('Hatalı giriş', 'Kullanıcı adı veya şifre hatalı.');
     }
@@ -39,54 +40,83 @@ const WelcomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar style='light' />
+      <StatusBar barStyle="light-content" />
       <Image
         source={require('../assets/images/Welcome_Zoo.png')}
         style={styles.bgImage}
-        resizeMode='cover'
+        resizeMode="cover"
       />
-      <View style={{ flex: 1 }}>
-        <LinearGradient
-          colors={['rgba(255,255,255,0)', 'rgba(255,255,255,0.5)', 'white', 'white']}
-          style={styles.gradient}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 0.8 }}
-        />
-        <View style={styles.contentContainer}>
-          <Text style={styles.title}>MyZoo</Text>
-          <Text style={styles.punchline}>Hayvanlar alemine giriş yapın</Text>
+      {/* Görselin üstünü karartan degrade — metin okunurluğu için */}
+      <LinearGradient
+        colors={['rgba(27,67,50,0.15)', 'rgba(27,67,50,0.55)', 'rgba(20,40,30,0.92)']}
+        style={StyleSheet.absoluteFill}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+      />
 
-          {/* Kullanıcı adı ve şifre giriş alanları */}
+      <KeyboardAvoidingView behavior="padding" style={styles.flex}>
+      <ScrollView
+        contentContainerStyle={styles.flexGrow}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+      <View style={styles.contentContainer}>
+        <View style={styles.brandRow}>
+          <Text style={styles.title}>MyZoo</Text>
+          <View style={styles.titleDot} />
+        </View>
+        <Text style={styles.punchline}>Hayvanlar alemine giriş yapın</Text>
+
+        {/* Kullanıcı adı */}
+        <View style={styles.inputWrap}>
+          <Ionicons name="person-outline" size={20} color={theme.colors.accent} style={styles.inputIcon} />
           <TextInput
-            style={[styles.input, { color: theme.colors.white }]}
+            style={styles.input}
             placeholder="Kullanıcı Adı"
             value={username}
             onChangeText={setUsername}
-            placeholderTextColor={theme.colors.white}
+            placeholderTextColor="rgba(255,255,255,0.55)"
+            autoCapitalize="none"
           />
+        </View>
+
+        {/* Şifre */}
+        <View style={styles.inputWrap}>
+          <Ionicons name="lock-closed-outline" size={20} color={theme.colors.accent} style={styles.inputIcon} />
           <TextInput
-          
-            style={[styles.input, { color: theme.colors.white }]}
+            style={styles.input}
             placeholder="Şifre"
             value={password}
             onChangeText={setPassword}
-            secureTextEntry={true}
-            placeholderTextColor={theme.colors.white}
+            secureTextEntry={!showPassword}
+            placeholderTextColor="rgba(255,255,255,0.55)"
           />
-
-          {/* Animated Giriş Butonu */}
-          <Animated.View style={[styles.startButtons, { transform: [{ scale: scaleAnim }] }]}>
-            <Pressable
-              onPressIn={handlePressIn} // Butona basınca küçült
-              onPressOut={handlePressOut} // Bırakılınca büyüt
-              onPress={handleLogin} // Kullanıcı adı ve şifre kontrolü
-              style={styles.startButtonE}
-            >
-              <Text style={styles.startTextE}>Giriş Yap</Text>
-            </Pressable>
-          </Animated.View>
+          <Pressable onPress={() => setShowPassword(!showPassword)} hitSlop={10}>
+            <Ionicons
+              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+              size={20}
+              color="rgba(255,255,255,0.7)"
+            />
+          </Pressable>
         </View>
+
+        {/* Giriş butonu */}
+        <Animated.View style={[styles.buttonWrap, { transform: [{ scale: scaleAnim }] }]}>
+          <Pressable
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            onPress={handleLogin}
+            style={styles.startButton}
+          >
+            <Text style={styles.startText}>Giriş Yap</Text>
+            <Ionicons name="arrow-forward" size={20} color={theme.colors.primary} />
+          </Pressable>
+        </Animated.View>
+
+        <Text style={styles.footerNote}>Hitit Üniversitesi · Mobil Programlama Projesi</Text>
       </View>
+      </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 };
@@ -94,66 +124,94 @@ const WelcomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.primary,
+  },
+  flex: {
+    flex: 1,
+  },
+  flexGrow: {
+    flexGrow: 1,
   },
   bgImage: {
     width: wp(100),
     height: hp(100),
     position: 'absolute',
   },
-  gradient: {
-    width: wp(100),
-    height: hp(25),
-    bottom: 0,
-    position: 'absolute',
-  },
   contentContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-end',
-    gap: 14,
+    paddingBottom: hp(6),
+    paddingHorizontal: wp(8),
+    gap: 12,
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
   },
   title: {
-    fontSize: hp(7),
-    color: theme.colors.neutral(0.9),
+    fontSize: hp(6.5),
+    color: theme.colors.white,
     fontWeight: theme.fontWeight.bold,
+    letterSpacing: 1,
+  },
+  titleDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: theme.colors.accent,
+    marginBottom: hp(1.4),
+    marginLeft: 4,
   },
   punchline: {
-    fontSize: hp(2),
-    letterSpacing: 1,
-    marginBottom: 10,
-    fontWeight: theme.fontWeight.medium,
+    fontSize: hp(1.9),
+    letterSpacing: 2,
+    marginBottom: hp(2),
+    color: 'rgba(255,255,255,0.85)',
+    textTransform: 'uppercase',
+  },
+  inputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    borderRadius: theme.radius.lg,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
+  },
+  inputIcon: {
+    marginRight: 10,
   },
   input: {
-    width: wp(80),
-    padding: 10,
-    marginVertical: 5,
-    backgroundColor:theme.colors.neutral(0.9),
-    borderRadius: 12,
-    borderColor: theme.colors.neutral(0.6),
-    borderWidth: 1,
-    fontSize: hp(2),  
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 2,
-    
-  },
-  startButtons: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  startButtonE: {
-    marginBottom: 20,
-    backgroundColor: theme.colors.neutral(0.9),
-    padding: 15,
-    borderRadius: theme.radius.xl,
-    borderCurve: 'continuous',
-  },
-  startTextE: {
+    flex: 1,
+    paddingVertical: 12,
+    fontSize: hp(2),
     color: theme.colors.white,
-    fontSize: 22,
-    fontWeight: theme.fontWeight.medium,
+  },
+  buttonWrap: {
+    width: '100%',
+    marginTop: hp(1.5),
+  },
+  startButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: theme.colors.accent,
+    paddingVertical: 16,
+    borderRadius: theme.radius.xl,
+  },
+  startText: {
+    color: theme.colors.primary,
+    fontSize: hp(2.3),
+    fontWeight: theme.fontWeight.bold,
+  },
+  footerNote: {
+    marginTop: hp(1.5),
+    fontSize: hp(1.5),
+    color: 'rgba(255,255,255,0.5)',
   },
 });
 

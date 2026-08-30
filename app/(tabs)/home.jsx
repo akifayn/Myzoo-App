@@ -1,56 +1,38 @@
-import React, { useEffect, useState,useRef  } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image,Linking, TouchableOpacity  } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, Image, Linking, TouchableOpacity } from 'react-native';
 import { theme } from '../../constants/theme';
 import { hp, wp } from '../../helpers/common';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import ZooHeader from '../../components/ZooHeader';
 import Animated, { FadeInLeft } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context'; // SafeAreaView import edildi
-import { collection, getDocs, query } from 'firebase/firestore'; // Firestore fonksiyonlarını ekliyoruz
-import { db } from '../../config/firebase'; // Firestore bağlantısını getiriyoruz
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { collection, getDocs, query } from 'firebase/firestore';
+import { db } from '../../config/firebase';
 import { Fonts } from '../../assets/fonts/fontsjs';
-import * as Font from 'expo-font';
-import { FontAwesome } from '@expo/vector-icons';
 
+// Bölüm başlığı: ikon rozeti + başlık
+function SectionTitle({ icon, title, innerRef }) {
+  return (
+    <View ref={innerRef} style={styles.sectionTitleRow}>
+      <View style={styles.sectionIconBadge}>
+        <Ionicons name={icon} size={16} color={theme.colors.primary} />
+      </View>
+      <Text style={styles.sectionTitle}>{title}</Text>
+    </View>
+  );
+}
 
 export default function HomeScreen() {
-
   const scrollRef = useRef();
 
   const animalsRef = useRef(null);
   const eventsRef = useRef(null);
   const feedingRef = useRef(null);
   const contactRef = useRef(null);
-  
-  const [animals, setAnimals] = useState([]); // Firestore'dan veri çekmek için state
+
+  const [animals, setAnimals] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [competitions, setCompetitions] = useState([]);
-  const [contact,setContact] = useState([])
-  const [fontsLoaded, setFontsLoaded] = useState(false);
-
-
-  useEffect(() => {
-    const loadFonts = async () => {
-      await Font.loadAsync({
-        [Fonts.RobotoBlack]: require('../../assets/fonts/Roboto-Black.ttf'),
-        [Fonts.RobotoBlackItalic]: require('../../assets/fonts/Roboto-BlackItalic.ttf'),
-        [Fonts.RobotoBold]: require('../../assets/fonts/Roboto-Bold.ttf'),
-        [Fonts.RobotoBoldItalic]: require('../../assets/fonts/Roboto-BoldItalic.ttf'),
-        [Fonts.RobotoItalic]: require('../../assets/fonts/Roboto-Italic.ttf'),
-        [Fonts.RobotoLight]: require('../../assets/fonts/Roboto-Light.ttf'),
-        [Fonts.RobotoLightItalic]: require('../../assets/fonts/Roboto-LightItalic.ttf'),
-        [Fonts.RobotoMedium]: require('../../assets/fonts/Roboto-Medium.ttf'),
-        [Fonts.RobotoMediumItalic]: require('../../assets/fonts/Roboto-MediumItalic.ttf'),
-        [Fonts.RobotoRegular]: require('../../assets/fonts/Roboto-Regular.ttf'),
-        [Fonts.RobotoThin]: require('../../assets/fonts/Roboto-Thin.ttf'),
-        [Fonts.RobotoThinItalic]: require('../../assets/fonts/Roboto-ThinItalic.ttf'),
-      });
-      setFontsLoaded(true);
-    };
-
-    loadFonts();
-  }, []);
-  
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
@@ -63,7 +45,7 @@ export default function HomeScreen() {
         }));
         setAnnouncements(announcementList);
       } catch (error) {
-        console.error("Error fetching announcements:", error);
+        console.error('Error fetching announcements:', error);
       }
     };
 
@@ -77,7 +59,7 @@ export default function HomeScreen() {
         }));
         setCompetitions(competitionList);
       } catch (error) {
-        console.error("Error fetching competitions:", error);
+        console.error('Error fetching competitions:', error);
       }
     };
 
@@ -85,136 +67,153 @@ export default function HomeScreen() {
     fetchCompetitions();
   }, []);
 
-  // Firestore'dan verileri çekmek için useEffect kullanıyoruz
   useEffect(() => {
     const fetchAnimals = async () => {
       try {
-        const q = query(collection(db, 'animals')); // Firestore bağlantısını kullanıyoruz
-        const animalSnapshot = await getDocs(q); // Verileri çek
+        const q = query(collection(db, 'animals'));
+        const animalSnapshot = await getDocs(q);
         const animalList = animalSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-        setAnimals(animalList); // Veriyi state'e set ediyoruz
+        setAnimals(animalList);
       } catch (error) {
-        console.error("Error fetching animals:", error);
+        console.error('Error fetching animals:', error);
       }
     };
-    fetchAnimals(); // Verileri çek
+    fetchAnimals();
   }, []);
 
   const handlePress = (url) => {
     Linking.openURL(url);
   };
 
-
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.container}>
-        <View style={styles.homeHeaderContainer}>
-          <ZooHeader style={styles.homeHeaderImage} scrollRef={scrollRef} animalsRef={animalsRef} eventsRef={eventsRef} feedingRef={feedingRef} contactRef={contactRef} />
-        </View>
+        <ZooHeader
+          scrollRef={scrollRef}
+          animalsRef={animalsRef}
+          eventsRef={eventsRef}
+          feedingRef={feedingRef}
+          contactRef={contactRef}
+        />
 
-        {/* Diğer içerikler kaydırılabilir */}
-        <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollViewContent} vertical showsVerticalScrollIndicator={false}>
-          {/* Bugün Görebileceğiniz Hayvanlar Başlık Kısmı */}
-          <View ref={animalsRef}style={styles.sectionTitleContainer}>
-            <Text style={styles.sectionTitle}>Bugün Görebileceğiniz Hayvanlar</Text>
-            <View style={styles.line} />
-          </View>
-
-          {/* Hayvanlar Arka Plan Rengi */}
-          <View style={styles.animalsSectionContainer}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {animals.length > 0 ? (
-                animals.map((animal) => (
-                  <Animated.View key={animal.id} entering={FadeInLeft.delay(600).duration(700)} style={styles.animalContainer}>
-                    <Image source={{ uri: animal.imageUrl }} style={styles.animalImage} />
-                    <Text style={styles.animalName}>{animal.name}</Text>
-                  </Animated.View>
-                ))
-              ) : (
-                <Text style={styles.loadingText}>Veriler yükleniyor...</Text>
-              )}
-            </ScrollView>
-          </View>
-
-          {/* Güncel Etkinlikler Bölümü */}
-          <View ref={eventsRef} style={styles.infoContainer}>
-            {/* <Image source={require('../../assets/images/announcement.png')} style={styles.iconLeft} /> */}
-            <Text style={styles.sectionTitle}>Güncel Etkinlikler</Text>
-            <View style={styles.line1} />
-
-            {/* Duyurular Alt Başlığı */}
-
-            <View style={styles.subSectionTitleContainer}>
-              <Image source={require('../../assets/images/announcement.png')} style={styles.iconLeft} />
-              <Text style={styles.subSectionTitle}>Duyurular</Text>
-            </View>
-            
-            <View style={styles.announcementContainer}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {announcements.map((announcement) => (
-                  <View key={announcement.id} style={styles.eventItem}>
-                    <Image source={{ uri: announcement.iconUrl }} style={styles.iconImage}/>
-                    <Ionicons name={announcement.icon} size={hp(3)} color={theme.colors.primary} />
-                    <View style={styles.eventTextContainer}>
-                      <Text style={styles.eventTitle}>{announcement.title}</Text>
-                      <Text style={styles.eventDescription}>{announcement.description}</Text>
-                    </View>
+        <ScrollView
+          ref={scrollRef}
+          contentContainerStyle={styles.scrollViewContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Bugün Görebileceğiniz Hayvanlar */}
+          <SectionTitle innerRef={animalsRef} icon="paw" title="Bugün Görebileceğiniz Hayvanlar" />
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.animalsRow}
+          >
+            {animals.length > 0 ? (
+              animals.map((animal, index) => (
+                <Animated.View
+                  key={animal.id}
+                  entering={FadeInLeft.delay(150 * index).duration(500)}
+                  style={styles.animalCard}
+                >
+                  <Image source={{ uri: animal.imageUrl }} style={styles.animalImage} />
+                  <View style={styles.animalNameBar}>
+                    <Text style={styles.animalName} numberOfLines={1}>{animal.name}</Text>
                   </View>
-                ))}
-              </ScrollView>
-            </View>
+                </Animated.View>
+              ))
+            ) : (
+              <Text style={styles.loadingText}>Veriler yükleniyor...</Text>
+            )}
+          </ScrollView>
 
-            {/* Yarışmalar Alt Başlığı */}
-            <View style={styles.subcompetitionContainer}>
-              <Image source={require('../../assets/images/competition.png')} style={styles.iconLeft} />
-              <Text style={styles.subSectionTitle}>Yarışmalar</Text>
-            </View>
-            
-            <View style={styles.competitionContainer}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {competitions.map((competition) => (
-                  <View key={competition.id} style={styles.eventItem}>
-                    <Image source={{ uri: competition.iconUrl }} style={styles.iconImage}/>
-                    <Ionicons name={competition.icon} size={hp(3)} color={theme.colors.primary} />
-                    <View style={styles.eventTextContainer}>
-                      <Text style={styles.eventTitle}>{competition.title}</Text>
-                      <Text style={styles.eventDescription}>{competition.description}</Text>
-                    </View>
-                  </View>
-                ))}
-              </ScrollView>
-            </View>      
-            {/* Beslenme Saatleri Metni */}
-            <View ref={feedingRef} style={styles.feedingTimesContainer}>
-              <Text style={styles.sectionTitle}>Beslenme Saatleri</Text>
-              {animals.map(animal => (
-                <View key={animal.id} style={styles.feedingTime}>
-                  <Text  style={styles.feedingTimeText}> {animal.name}  </Text>
-                  <Text>: {animal.feedingTime?.start} - {animal.feedingTime?.end}</Text>
+          {/* Güncel Etkinlikler */}
+          <SectionTitle innerRef={eventsRef} icon="calendar" title="Güncel Etkinlikler" />
+
+          <Text style={styles.subSectionTitle}>Duyurular</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.eventsRow}
+          >
+            {announcements.map((announcement) => (
+              <View key={announcement.id} style={styles.eventCard}>
+                <Image source={{ uri: announcement.iconUrl }} style={styles.eventImage} />
+                <View style={styles.eventTextContainer}>
+                  <Text style={styles.eventTitle} numberOfLines={1}>{announcement.title}</Text>
+                  <Text style={styles.eventDescription} numberOfLines={3}>{announcement.description}</Text>
                 </View>
-              ))}
-            </View>
-            <View ref={contactRef} style={styles.contactContainer}>
-              {/* <Text style={styles.sectionTitle}>İletişim</Text> */}
-              <View style={styles.socialIconsContainer}>
-                <TouchableOpacity onPress={() => handlePress('https://www.linkedin.com/in/muhammet-akif-ayan')}>
-                  <FontAwesome name="linkedin-square" size={50} color="#0077B5" style={styles.socialIcon} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => handlePress('projedepom61@gmail.com')}>
-                  <Ionicons name="mail" size={50} color="#D44638" style={styles.socialIcon} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => handlePress('https://github.com/akifayn')}>
-                  <FontAwesome name="github-square" size={50} color="black" style={styles.socialIcon} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => handlePress('https://www.instagram.com/akif_.ayn/')}>
-                  <Ionicons name="logo-instagram" size={50} color="#C13584" style={styles.socialIcon} />
-                </TouchableOpacity>
               </View>
-            </View>
+            ))}
+          </ScrollView>
 
+          <Text style={styles.subSectionTitle}>Yarışmalar</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.eventsRow}
+          >
+            {competitions.map((competition) => (
+              <View key={competition.id} style={styles.eventCard}>
+                <Image source={{ uri: competition.iconUrl }} style={styles.eventImage} />
+                <View style={styles.eventTextContainer}>
+                  <Text style={styles.eventTitle} numberOfLines={1}>{competition.title}</Text>
+                  <Text style={styles.eventDescription} numberOfLines={3}>{competition.description}</Text>
+                </View>
+              </View>
+            ))}
+          </ScrollView>
+
+          {/* Beslenme Saatleri */}
+          <SectionTitle innerRef={feedingRef} icon="restaurant" title="Beslenme Saatleri" />
+          <View style={styles.feedingCard}>
+            {animals.map((animal, index) => (
+              <View
+                key={animal.id}
+                style={[styles.feedingRow, index < animals.length - 1 && styles.feedingRowBorder]}
+              >
+                <Text style={styles.feedingName}>{animal.name}</Text>
+                <View style={styles.feedingTimePill}>
+                  <Ionicons name="time-outline" size={14} color={theme.colors.primary} />
+                  <Text style={styles.feedingTimeText}>
+                    {animal.feedingTime?.start || '—'} – {animal.feedingTime?.end || '—'}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+
+          {/* İletişim */}
+          <View ref={contactRef} style={styles.contactCard}>
+            <Text style={styles.contactTitle}>Bize Ulaşın</Text>
+            <View style={styles.socialIconsContainer}>
+              <TouchableOpacity
+                style={styles.socialButton}
+                onPress={() => handlePress('https://www.linkedin.com/in/muhammet-akif-ayan')}
+              >
+                <FontAwesome name="linkedin" size={22} color={theme.colors.white} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.socialButton}
+                onPress={() => handlePress('mailto:projedepom61@gmail.com')}
+              >
+                <Ionicons name="mail" size={22} color={theme.colors.white} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.socialButton}
+                onPress={() => handlePress('https://github.com/akifayn')}
+              >
+                <FontAwesome name="github" size={22} color={theme.colors.white} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.socialButton}
+                onPress={() => handlePress('https://www.instagram.com/akif_.ayn/')}
+              >
+                <Ionicons name="logo-instagram" size={22} color={theme.colors.white} />
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
       </View>
@@ -225,225 +224,173 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#D2B48C',
+    backgroundColor: theme.colors.bg,
   },
   container: {
     flex: 1,
   },
-  homeHeaderContainer: {
+  scrollViewContent: {
+    paddingBottom: 130, // tab bar + sistem tuşlarının altında içerik kalmasın
+  },
+  sectionTitleRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E7FBE6',
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    gap: 10,
+    paddingHorizontal: 16,
+    marginTop: 22,
+    marginBottom: 12,
   },
-  homeHeaderImage: {
-    width: wp(100),
-    height: hp(20),
-  },
-  sectionTitleContainer: {
-    padding: 10,
+  sectionIconBadge: {
+    width: 30,
+    height: 30,
+    borderRadius: theme.radius.xs,
+    backgroundColor: theme.colors.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   sectionTitle: {
-    marginBottom:15,
-    fontSize: hp(3),
-    fontWeight: theme.fontWeight.medium,
-    fontFamily: Fonts.RobotoBoldItalic,
-  },
-  line: {
-    height: 2,                    
-    backgroundColor: '#000',        
-    marginHorizontal: 8,           
-    shadowColor: '#000',            
-    shadowOffset: { width: 0, height: 2 }, 
-    shadowOpacity: 0.3,             
-    shadowRadius: 4,               
-    elevation: 3,                   
-    marginBottom: 10,               
-  },
-  line1:{
-    height: 2,                    
-    backgroundColor: '#000',        
-   // marginRight: 100,                      
-    shadowColor: '#000',            
-    shadowOffset: { width: 0, height: 2 }, 
-    shadowOpacity: 0.3,             
-    shadowRadius: 4,               
-    elevation: 3,                   
-    marginBottom: 10,       
-  },
-  subSectionTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    margin: 10,
-    alignItems:'center',
-    justifyContent:'center',
-  },
-  animalsSectionContainer: {
-    backgroundColor: '#FFF8D1',
-    margin: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    shadowColor: '#272727',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 1,
-    shadowRadius: 3.84,
-    elevation: 7,
-  },
-  animalContainer: {
-    alignItems: 'center',
-    marginRight: 10,
-    padding: 10,
-    borderRadius: 10,
-  },
-  animalImage: {
-    width: wp(32),
-    height: hp(16),
-    //borderRadius: 10,
-    resizeMode:'stretch'
-  },
-  animalName: {
-    marginTop: 5,
-    fontSize: hp(2),
-    fontWeight: theme.fontWeight.medium,
-  },
-  loadingText: {
-    fontSize: hp(2.5),
-    color: theme.colors.primary,
-  },
-  infoContainer: {
-    marginTop: 20,
-    paddingHorizontal: 10,
-  },
-  iconLeft:{
-    width: wp(15),
-    height: hp(8),
-  },
-  subcompetitionContainer:{
-    flexDirection: 'row',
-    alignItems: 'center',
-    margin: 10,
-  //  alignItems:'center',
-    //justifyContent:'start',
+    fontSize: hp(2.4),
+    color: theme.colors.ink,
+    fontFamily: Fonts.RobotoBold,
+    flexShrink: 1,
   },
   subSectionTitle: {
-    fontSize: hp(2.5),
-    fontFamily: Fonts.RobotoBoldItalic,
-    //marginBottom: 10,
-    color: theme.colors.primary,
+    fontSize: hp(1.9),
+    color: theme.colors.inkSoft,
+    fontFamily: Fonts.RobotoMedium,
+    paddingHorizontal: 16,
+    marginBottom: 8,
   },
-  eventItem: {
+  animalsRow: {
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  animalCard: {
+    width: wp(34),
+    borderRadius: theme.radius.lg,
+    overflow: 'hidden',
+    backgroundColor: theme.colors.surface,
+    ...theme.shadow,
+  },
+  animalImage: {
+    width: '100%',
+    height: hp(14),
+    resizeMode: 'cover',
+  },
+  animalNameBar: {
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    backgroundColor: theme.colors.surface,
+  },
+  animalName: {
+    fontSize: hp(1.8),
+    color: theme.colors.ink,
+    fontFamily: Fonts.RobotoBold,
+    textAlign: 'center',
+  },
+  loadingText: {
+    fontSize: hp(2),
+    color: theme.colors.inkSoft,
+    padding: 16,
+  },
+  eventsRow: {
+    paddingHorizontal: 16,
+    gap: 12,
+    marginBottom: 10,
+  },
+  eventCard: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 20,
-    paddingVertical: 10,
-    
+    width: wp(72),
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.lg,
+    padding: 10,
+    gap: 10,
+    ...theme.shadowSoft,
   },
-  iconImage:{
-    width: wp(24),
-    height: hp(11),
-    borderRadius: 10,
-    resizeMode:'stretch'
-    
+  eventImage: {
+    width: wp(20),
+    height: wp(20),
+    borderRadius: theme.radius.sm,
+    resizeMode: 'cover',
+    backgroundColor: theme.colors.surfaceAlt,
   },
   eventTextContainer: {
-    marginLeft: 10,
-
+    flex: 1,
+    justifyContent: 'center',
   },
   eventTitle: {
-    fontSize: hp(2.5),
-    fontFamily: Fonts.RobotoBoldItalic,
-
+    fontSize: hp(1.9),
+    color: theme.colors.ink,
+    fontFamily: Fonts.RobotoBold,
+    marginBottom: 3,
   },
   eventDescription: {
-    fontSize: hp(2),
-    color: theme.colors.grey,
-    fontFamily: Fonts.RobotoItalic,
+    fontSize: hp(1.6),
+    lineHeight: hp(2.1),
+    color: theme.colors.inkSoft,
+    fontFamily: Fonts.RobotoRegular,
   },
-  announcementContainer: {
-    backgroundColor: '#FFF8D1',
-    padding: 10,
-    borderRadius: 10,
-    shadowColor: '#272727',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 1,
-    shadowRadius: 3.84,
-    elevation: 5,
+  feedingCard: {
+    marginHorizontal: 16,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.lg,
+    paddingHorizontal: 14,
+    ...theme.shadowSoft,
   },
-  competitionContainer: {
-    backgroundColor: '#FFF8D1',
-    padding: 10,
-    borderRadius: 10,
-    shadowColor: '#272727',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  feedingTimesContainer: {
-
-    backgroundColor: '#FFF8D1', // Hardal sarısı arka plan
-    padding: 10,
-    borderRadius: 10,
-    marginTop: 20,
-    marginBottom:20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,  
-    },
-  },
-  contactContainer: {
-    padding: 15,
+  feedingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    borderWidth: 2,             
-    backgroundColor: '#FFF8D1',
-    borderRadius: 10,          
-    margin: 6,                  
-    shadowColor: '#000',        
-    shadowOffset: { width: 0, height: 2 }, 
-      shadowOpacity: 0.3,         
-      shadowRadius: 5,            
-      elevation: 5,              
+    paddingVertical: 12,
   },
-  socialIconsContainer:{
-    flexDirection:'row',
-
+  feedingRowBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.bg,
   },
-  socialIcon:{
-    marginRight:5
+  feedingName: {
+    fontSize: hp(1.9),
+    color: theme.colors.ink,
+    fontFamily: Fonts.RobotoMedium,
   },
-  scrollViewContent: {
-    paddingBottom: 30, 
-  },
-  feedingTime: {
-   
-  
-    flexDirection:'row',
-    justifyContent:"space-between",
-   
-  
+  feedingTimePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: theme.colors.surfaceAlt,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: theme.radius.full,
   },
   feedingTimeText: {
-    fontSize: hp(2),
-    color: theme.colors.darkGrey,
-    marginBottom: 5,
-    
-    
-  
+    fontSize: hp(1.6),
+    color: theme.colors.primary,
+    fontFamily: Fonts.RobotoMedium,
+  },
+  contactCard: {
+    marginHorizontal: 16,
+    marginTop: 24,
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.radius.xl,
+    padding: 20,
+    alignItems: 'center',
+    ...theme.shadow,
+  },
+  contactTitle: {
+    fontSize: hp(2.1),
+    color: theme.colors.white,
+    fontFamily: Fonts.RobotoBold,
+    marginBottom: 14,
+  },
+  socialIconsContainer: {
+    flexDirection: 'row',
+    gap: 14,
+  },
+  socialButton: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

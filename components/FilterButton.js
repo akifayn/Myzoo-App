@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { theme } from '../constants/theme';
 
 export default function FilterButton({ onFilterChange, selectedFilters }) {
   const [filters, setFilters] = useState([]);
@@ -23,18 +25,21 @@ export default function FilterButton({ onFilterChange, selectedFilters }) {
 
   return (
     <View style={styles.filterContainer}>
-      {filters.map((filter) => (
-        <TouchableOpacity
-          key={filter.id}
-          style={[
-            styles.filterButton,
-            selectedFilters[filter.name] ? styles.activeFilter : null,
-          ]}
-          onPress={() => onFilterChange(filter.name, filter.options)}
-        >
-          <Text>{filter.name}</Text>
-        </TouchableOpacity>
-      ))}
+      {filters.map((filter) => {
+        const active = !!selectedFilters[filter.name];
+        return (
+          <TouchableOpacity
+            key={filter.id}
+            style={[styles.filterButton, active && styles.activeFilter]}
+            onPress={() => onFilterChange(filter.name, filter.options)}
+          >
+            {active && <Ionicons name="checkmark" size={14} color={theme.colors.white} />}
+            <Text style={[styles.filterText, active && styles.activeFilterText]}>
+              {filter.name}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 }
@@ -42,24 +47,30 @@ export default function FilterButton({ onFilterChange, selectedFilters }) {
 const styles = StyleSheet.create({
   filterContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 5,
-    marginVertical: 10,
-   // borderWidth:2
+    paddingHorizontal: 12,
+    gap: 8,
   },
   filterButton: {
-    margin:3,
-    backgroundColor: '#E7FBE6',
-   // padding: 10,
-    borderRadius: 5,
-    marginHorizontal: 5,
-    borderWidth:2,
-width:100,
-height:40,
-flexDirection:'row',
-justifyContent:'center',
-alignItems:'center'
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: theme.radius.full,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: 'rgba(27,67,50,0.15)',
   },
   activeFilter: {
-    backgroundColor: '#BFE3B4', // Aktif filtre rengi
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
+  },
+  filterText: {
+    fontSize: 13,
+    color: theme.colors.ink,
+    fontWeight: theme.fontWeight.medium,
+  },
+  activeFilterText: {
+    color: theme.colors.white,
   },
 });

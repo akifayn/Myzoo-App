@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet, Text, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import AnimalsHeader from '../../components/AnimalsHeader';
 import AnimalGroupAccordion from '../../components/AnimalGroupAccordion';
+import { theme } from '../../constants/theme';
 
 export default function AnimalsCategory() {
   const [searchTerm, setSearchTerm] = useState(''); // Arama terimi
   const [animals, setAnimals] = useState([]); // Tüm hayvanlar
-  const [filteredAnimals, setFilteredAnimals] = useState([]); // Filtrelenmiş hayvanlar
   const [selectedFilters, setSelectedFilters] = useState({}); // Seçilen filtreler
   const [groupedAnimals, setGroupedAnimals] = useState({}); // Gruplandırılmış hayvanlar
 
@@ -23,7 +23,6 @@ export default function AnimalsCategory() {
       }));
 
       setAnimals(animalsList);
-      setFilteredAnimals(animalsList); // Başlangıçta tüm hayvanlar gösteriliyor
       groupAnimals(animalsList); // Gruplama işlemi
     };
 
@@ -63,7 +62,6 @@ export default function AnimalsCategory() {
       );
     }
 
-    setFilteredAnimals(updatedAnimals); // Filtrelenmiş hayvanları ayarla
     groupAnimals(updatedAnimals); // Gruplama işlemi
   };
 
@@ -116,14 +114,14 @@ export default function AnimalsCategory() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#D2B48C', // HomeScreen'deki arka plan rengiyle aynı
+    backgroundColor: theme.colors.bg,
   },
   scrollContainer: {
-    flex:1,
-    padding: 16,
+    flex: 1,
+    paddingHorizontal: 16,
   },
   contentContainer: {
-    flexGrow: 1,  // İçeriğin büyümesi ve kaydırılabilir olması
-    paddingBottom: 50,  // Alt kısımda ekstra boşluk bırakmak için
+    flexGrow: 1,
+    paddingBottom: 130, // tab bar + sistem tuşlarının altında içerik kalmasın
   },
 });

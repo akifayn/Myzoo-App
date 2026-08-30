@@ -1,12 +1,14 @@
 import { Tabs } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Colors } from '../../constants/Colors';
 import * as Font from 'expo-font';
 import { useState, useEffect } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Fonts } from '../../assets/fonts/fontsjs';
+import { theme } from '../../constants/theme';
 
 export default function TabLayout() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const insets = useSafeAreaInsets(); // sistem tuş çubuğu yüksekliği
 
   useEffect(() => {
     const loadFonts = async () => {
@@ -31,72 +33,50 @@ export default function TabLayout() {
   }, []);
 
   if (!fontsLoaded) {
-    return null; // Fontlar yüklenene kadar boş bir bileşen döndürür
+    return null;
   }
+
+  const screens = [
+    { name: 'home', label: 'Ana Sayfa', icon: 'home', iconOutline: 'home-outline' },
+    { name: 'animalsCategory', label: 'Hayvanlar', icon: 'paw', iconOutline: 'paw-outline' },
+    { name: 'map', label: 'Harita', icon: 'map', iconOutline: 'map-outline' },
+    { name: 'profile', label: 'Profil', icon: 'person', iconOutline: 'person-outline' },
+  ];
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor:'#E7FBE6',  // Sekme çubuğunun arka plan rengi 
-          borderTopLeftRadius: 30,
-          borderTopRightRadius: 30,
-          paddingBottom: 2, // İkonları ve yazıları biraz yukarı taşımak için
-          paddingTop: 5,
+          backgroundColor: theme.colors.primary,
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
+          borderTopWidth: 0,
+          height: 58 + insets.bottom,
+          paddingBottom: Math.max(insets.bottom, 8),
+          paddingTop: 8,
+          position: 'absolute',
         },
-        tabBarActiveTintColor: '#821131',  // Aktif sekme rengi
-        tabBarInactiveTintColor:'#E85C0D',  // Pasif sekme rengi
+        tabBarActiveTintColor: theme.colors.accent,
+        tabBarInactiveTintColor: 'rgba(255,255,255,0.55)',
+        tabBarLabelStyle: {
+          fontFamily: Fonts.RobotoMedium,
+          fontSize: 11,
+        },
       }}
     >
-      <Tabs.Screen
-        name="home"
-        options={{
-          tabBarLabel: 'Home',
-          tabBarLabelStyle: {
-            fontFamily: Fonts.RobotoBoldItalic,
-            fontSize: 14,
-            color: '#272727', // Sekme etiketi rengi
-          },
-          tabBarIcon: ({ color }) => <Ionicons name="home" size={20} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="animalsCategory"
-        options={{
-          tabBarLabel: 'Animals',
-          tabBarLabelStyle: {
-            fontFamily: Fonts.RobotoBoldItalic,
-            fontSize: 14,
-            color: '#272727',
-          },
-          tabBarIcon: ({ color }) => <Ionicons name="paw" size={20} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="map"
-        options={{
-          tabBarLabel: 'Map',
-          tabBarLabelStyle: {
-            fontFamily: Fonts.RobotoBoldItalic,
-            fontSize: 14,
-            color: '#272727',
-          },
-          tabBarIcon: ({ color }) => <Ionicons name="map" size={20} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          tabBarLabel: 'Profile',
-          tabBarLabelStyle: {
-            fontFamily: Fonts.RobotoBoldItalic,
-            fontSize: 14,
-            color: '#272727',
-          },
-          tabBarIcon: ({ color }) => <Ionicons name="people" size={20} color={color} />,
-        }}
-      />
+      {screens.map((screen) => (
+        <Tabs.Screen
+          key={screen.name}
+          name={screen.name}
+          options={{
+            tabBarLabel: screen.label,
+            tabBarIcon: ({ color, focused }) => (
+              <Ionicons name={focused ? screen.icon : screen.iconOutline} size={22} color={color} />
+            ),
+          }}
+        />
+      ))}
     </Tabs>
   );
 }

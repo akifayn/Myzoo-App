@@ -1,10 +1,32 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet,Image } from 'react-native';
-import { collection, getDocs } from 'firebase/firestore';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { db } from '../config/firebase';
 import { hp, wp } from '../helpers/common';
+import { theme } from '../constants/theme';
+import { Fonts } from '../assets/fonts/fontsjs';
 
+// Öznitelik rozetleri: hayvanın önemli özelliklerini çipler halinde gösterir
+function TraitBadges({ animal }) {
+  const traits = [];
+  if (animal.habitat) traits.push({ icon: 'leaf-outline', label: animal.habitat });
+  if (animal.diet) traits.push({ icon: 'restaurant-outline', label: animal.diet });
+  if (animal.isPredator) traits.push({ icon: 'flash-outline', label: 'Avcı' });
+  if (animal.isNocturnal) traits.push({ icon: 'moon-outline', label: 'Gececi' });
+  if (animal.isEndangered) traits.push({ icon: 'warning-outline', label: 'Nesli Tehlikede' });
+
+  if (traits.length === 0) return null;
+
+  return (
+    <View style={styles.badgeRow}>
+      {traits.slice(0, 3).map((trait) => (
+        <View key={trait.label} style={styles.badge}>
+          <Ionicons name={trait.icon} size={11} color={theme.colors.primary} />
+          <Text style={styles.badgeText} numberOfLines={1}>{trait.label}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
 
 const AnimalGroupAccordion = ({ groupName, animals }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,13 +36,18 @@ const AnimalGroupAccordion = ({ groupName, animals }) => {
   };
 
   return (
-    <View>
-      <TouchableOpacity style={styles.groupHeader} onPress={toggleAccordion}>
-        <Text style={styles.groupName}>{groupName}</Text>
+    <View style={styles.wrapper}>
+      <TouchableOpacity style={styles.groupHeader} onPress={toggleAccordion} activeOpacity={0.8}>
+        <View style={styles.groupTitleRow}>
+          <View style={styles.pawBadge}>
+            <Ionicons name="paw" size={14} color={theme.colors.accent} />
+          </View>
+          <Text style={styles.groupName}>{groupName}</Text>
+        </View>
         <Ionicons
           name={isOpen ? 'chevron-up' : 'chevron-down'}
-          size={24}
-          color="black"
+          size={20}
+          color={theme.colors.inkSoft}
         />
       </TouchableOpacity>
 
@@ -28,10 +55,13 @@ const AnimalGroupAccordion = ({ groupName, animals }) => {
         <View style={styles.groupContent}>
           {animals.map((animal) => (
             <View key={animal.id} style={styles.animalItem}>
-              <Image source={{ uri: animal.imageUrl }} style={styles.imageUrl}/>
-              <View style={styles.animalSec}>
-
-              <Text style={styles.animalName}>{animal.name}</Text>
+              <Image source={{ uri: animal.imageUrl }} style={styles.animalImage} />
+              <View style={styles.animalInfo}>
+                <Text style={styles.animalName}>{animal.name}</Text>
+                {animal.age ? (
+                  <Text style={styles.animalAge}>{animal.age} yaşında</Text>
+                ) : null}
+                <TraitBadges animal={animal} />
               </View>
             </View>
           ))}
@@ -42,69 +72,91 @@ const AnimalGroupAccordion = ({ groupName, animals }) => {
 };
 
 const styles = StyleSheet.create({
+  wrapper: {
+    marginBottom: 10,
+  },
   groupHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#FFF8D1',
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 10,
-    shadowColor: '#272727',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 3.84,
-    elevation: 7,
+    backgroundColor: theme.colors.surface,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: theme.radius.lg,
+    ...theme.shadowSoft,
+  },
+  groupTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  pawBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: theme.colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   groupName: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 16,
+    color: theme.colors.ink,
+    fontFamily: Fonts.RobotoBold,
   },
   groupContent: {
-    backgroundColor: '#FFF',
+    backgroundColor: theme.colors.surfaceAlt,
     padding: 10,
-    borderRadius: 10,
-    shadowColor: '#272727',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 3.84,
-    elevation: 7,
+    borderRadius: theme.radius.lg,
+    marginTop: 6,
+    gap: 8,
   },
   animalItem: {
-    backgroundColor: '#F5F5F5',
-    paddingVertical:3,
-    paddingHorizontal:4,
-   // padding: 10,
-    //marginVertical: 5,
-    borderRadius: 10,
-    shadowColor: '#272727',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 3.84,
-    elevation: 7,
-    flexDirection:'row',
-    justifyContent:'space-between'
-
+    flexDirection: 'row',
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.md,
+    padding: 8,
+    gap: 10,
+    ...theme.shadowSoft,
   },
-  animalSec:{
-    marginHorizontal:4,
-    width:240,
-borderWidth:3,
-flexDirection:'row',
-borderRadius:10
-   // justifyContent:'space-between'
+  animalImage: {
+    width: wp(22),
+    height: wp(22),
+    borderRadius: theme.radius.sm,
+    backgroundColor: theme.colors.bg,
+  },
+  animalInfo: {
+    flex: 1,
+    justifyContent: 'center',
   },
   animalName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    alignItems:'center',
-    textAlign:'center'
+    fontSize: hp(1.9),
+    color: theme.colors.ink,
+    fontFamily: Fonts.RobotoBold,
   },
-  imageUrl:{
-    alignItems:'flex-end',
-    width: wp(24),
-    height: hp(10),
-    borderRadius: 10,
+  animalAge: {
+    fontSize: hp(1.5),
+    color: theme.colors.inkSoft,
+    marginTop: 1,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+    marginTop: 6,
+  },
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: theme.colors.accentSoft,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: theme.radius.full,
+  },
+  badgeText: {
+    fontSize: 10,
+    color: theme.colors.primary,
+    fontWeight: theme.fontWeight.medium,
   },
 });
 

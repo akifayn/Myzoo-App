@@ -1,24 +1,31 @@
 import { Stack } from 'expo-router';
 import { StyleSheet } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { theme } from '../constants/theme';
 
 export default function RootLayout() {
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen 
-        name="index" 
-      />  
-      <Stack.Screen 
-        name="(tabs)" 
-        options={{
-          contentStyle: styles.screenBackground, // Tab ekranı için de aynı arka plan stili
-        }} 
-      />  
-    </Stack>
+    <GestureHandlerRootView style={styles.root}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen
+          name="index"
+        />
+        <Stack.Screen
+          name="(tabs)"
+          options={{
+            contentStyle: styles.screenBackground,
+          }}
+        />
+      </Stack>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
   screenBackground: {
-    backgroundColor: '#D2B48C', // Burada arka plan rengini tanımlıyoruz (Açık kahverengi)
+    backgroundColor: theme.colors.bg,
   },
 });
