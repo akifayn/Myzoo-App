@@ -2,6 +2,8 @@
 
 MyZoo is a modern mobile application built with React Native and Expo, designed to enhance the zoo experience for visitors. The app provides features like animal information, interactive maps, and real-time updates about zoo activities.
 
+> **Background:** Built as an individual project during a mobile development internship at SASKİ, after React Native training alongside the mobile team.
+
 ## 🚀 Features
 
 - Interactive zoo map with directions
